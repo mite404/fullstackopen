@@ -2,61 +2,99 @@ import { useState } from 'react'
 import './App.css'
 
 const App = () => {
-  const course = 'Half Stack application development'
-  const parts = [
+  const courses = [
     {
-      name: 'Fundamentals of React',
-      exercises: 10
+      name: 'Half Stack application development',
+      id: 1,
+      parts: [
+        {
+          name: 'Fundamentals of React',
+          exercises: 10,
+          id: 1
+        },
+        {
+          name: 'Using props to pass data',
+          exercises: 7,
+          id: 2
+        },
+        {
+          name: 'State of a component',
+          exercises: 14,
+          id: 3
+        },
+        {
+          name: 'Redux',
+          exercises: 11,
+          id: 4
+        }
+      ]
     },
     {
-      name: 'Using props to pass data',
-      exercises: 7
-    },
-    {
-      name: 'State of a component',
-      exercises: 14
+      name: 'Node.js',
+      id: 2,
+      parts: [
+        {
+          name: 'Routing',
+          exercises: 3,
+          id: 1
+        },
+        {
+          name: 'Middlewares',
+          exercises: 7,
+          id: 2
+        }
+      ]
     }
   ]
 
-  const Header = (props) => {
-    console.log(props)
-    return (
-        <h1>{props.course}</h1>
-    )
-  }
-
-  const Part = ({ parts, exercises }) => {
-    return (
-        <p>{parts} {exercises}</p>
-    )
-  }
-
-  const Content = ({ parts }) => {
-
-    return (
-        <>
-          <Part parts={parts[0].name} exercises={parts[0].exercises} />
-          <Part parts={parts[1].name} exercises={parts[1].exercises} />
-          <Part parts={parts[2].name} exercises={parts[2].exercises} />
-        </>
-    )
-  }
-
-  const Total = ({ text, parts}) => {
-    const totalExercises = parts[0].exercises + parts[1].exercises + parts[2].exercises
-    return (
-        <>
-          <p>{text} {totalExercises}</p>
-        </>
-    )
-  }
-
   return (
       <div>
-        <Header course={course} />
-          <Content parts={parts} />
-          <Total text='Total number of exercises: ' parts={parts} />
+        {courses.map(course =>
+            <Course key={course.id} course={course}/>
+        )}
       </div>
+  )
+}
+
+
+const Course = ({ course }) => {
+  return (
+      <>
+        <Header course={course.name} />
+        <Content parts={course.parts} />
+        <Total parts={course.parts} />
+      </>
+  )
+}
+
+const Header = ({ course }) => {
+  return <h1>{course}</h1>
+}
+
+const Content = ({ parts }) => {
+  return (
+      <p>
+        {parts.map(part =>
+            <Part key={part.id} part={part} />
+        )}
+      </p>
+  )
+}
+
+const Part = ({ part }) => {
+  return (
+      <p>
+        {part.name} - Exercises: {part.exercises}
+      </p>
+  )
+}
+
+const Total = ({ parts }) => {
+  const totalExercises = parts.reduce((sum, part) => sum + part.exercises, 0)
+  return (
+      <p>
+        <strong>Total of {totalExercises} exercises</strong>
+      </p>
   )
 }
 
