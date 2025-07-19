@@ -5,6 +5,7 @@ const App = () => {
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newPhoneNum, setNewPhoneNum] = useState('')
+  const [searchTerm, setSearchTerm] = useState('')
 
   const addContact = (event) => {
     event.preventDefault()
@@ -25,6 +26,8 @@ const App = () => {
     setNewPhoneNum('')
   }
 
+  const filteredPersons = persons.filter(person => person.name.toLowerCase().includes(searchTerm.toLowerCase()))
+
   const handleNameChange = (event) => {
     console.log('new event: ', event.target)
     setNewName(event.target.value)
@@ -35,6 +38,11 @@ const App = () => {
     setNewPhoneNum(event.target.value)
   }
 
+  const handleSearch = (event) => {
+    console.log('new event: ', event.target)
+    setSearchTerm(event.target.value)
+  }
+
   const removeHyphens = (phoneNumber) => {
     return phoneNumber.replace(/-/g, '');
   }
@@ -42,7 +50,11 @@ const App = () => {
   return (
       <div>
         <h2>Phonebook</h2>
+        <h3>Search: <input  value={searchTerm}
+                            onChange={handleSearch}/></h3>
+        <hr/>
         <form onSubmit={addContact}>
+          <h3>Add a contact</h3>
           <div>
             name: <input  value={newName}
                           onChange={handleNameChange}/>
@@ -56,7 +68,7 @@ const App = () => {
         </form>
         <h2>Names</h2>
         <div>
-          {persons.map(person =>
+          {filteredPersons.map(person =>
             <div key={person.name}>{person.name}: {removeHyphens(person.phonenumber)}</div>)}
         </div>
       </div>
