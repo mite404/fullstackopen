@@ -13,7 +13,7 @@ const App = (props) => {
     const noteObject = {  // create new object for the incoming note from component's newNote state
       content: newNote,  // value of 'newNote' will be passed here from user's input
       important: Math.random() < 0.5,  // 50% chance of being marked 'important'
-      id: String(notes.length + 1),  // unique identifier generated based on total number of notes
+      id: String(notes.length + 1),   // unique identifier generated based on total number of notes
     }
 
     setNotes(notes.concat(noteObject))  // add new note to list of notes -- creates new copy of
