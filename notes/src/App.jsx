@@ -1,12 +1,24 @@
 import Note from './components/Note'
-import {useState} from "react";
+import {useState, useEffect} from "react";
+import axios from "axios";
 import './App.css'
 
-const App = (props) => {
-  const [notes, setNotes] = useState(props.notes)
+
+const App = () => {
+  const [notes, setNotes] = useState([])
   const [newNote, setNewNote] = useState('')
   const [showAll, setShowAll] = useState(true)
 
+  useEffect(() => {
+    console.log('effect')
+    axios
+      .get('http://localhost:3001/notes')
+      .then(response => {  // when data arrives,
+        console.log('promise fulfilled')  // event handler is called printing 'promise fulfilled'
+        setNotes(response.data)  // stores data received from server into state `setNotes`
+      })                         // call to state-updating func triggers re-rendering of component
+  }, []);
+  console.log('render', notes.length, 'notes')
 
   const addNote = (event) => {
     event.preventDefault()
