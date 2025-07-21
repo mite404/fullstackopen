@@ -1,13 +1,27 @@
-import {useState} from 'react'
+import {useEffect, useState} from 'react'
 import './App.css'
 import { Search } from './components/Search.jsx'
 import { PhonebookList } from './components/PhonebookList.jsx'
 import { Form } from "./components/Form.jsx";
-
+import axios from "axios";
 
 const App = () => {
   const [persons, setPersons] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
+
+  useEffect(() => {
+    axios.get('http://localhost:3001/persons')
+         .then(response => {
+           console.log('Data fetched successfully: ', response.data)
+
+           // ensure response.data.persons is an array if not, set validPersons to an empty array
+           const validPersons = Array.isArray(response.data.persons)
+               ? response.data.persons : []
+
+           setPersons(validPersons)
+         })
+         .catch(error => console.error('Error fetching phonebook:', error))
+  }, []);
 
   const addContact = (newName, newPhoneNum) => {
     if (persons.find(person => person.name === newName || person.phonenumber === newPhoneNum)) {
