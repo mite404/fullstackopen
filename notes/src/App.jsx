@@ -2,6 +2,7 @@ import Note from './components/Note'
 import {useState, useEffect} from "react";
 import axios from "axios";
 import './App.css'
+import noteService from './services/notes'
 
 
 const App = () => {
@@ -10,28 +11,12 @@ const App = () => {
   const [showAll, setShowAll] = useState(true)
 
   useEffect(() => {
-    console.log('effect')
-    axios
-      .get('http://localhost:3001/notes')
-      .then(response => {  // when data arrives,
-        console.log('promise fulfilled')  // event handler is called printing 'promise fulfilled'
-        setNotes(response.data)  // stores data received from server into state `setNotes`
-      })                         // call to state-updating func triggers re-rendering of component
+    noteService
+      .getAll()
+      .then(initialNotes => {
+        setNotes(initialNotes)
+      })
   }, []);
-  console.log('render', notes.length, 'notes')
-
-  const addNote = (event) => {
-    event.preventDefault()
-    const noteObject = {  // create new object for the incoming note from component's newNote state
-      content: newNote,  // value of 'newNote' will be passed here from user's input
-      important: Math.random() < 0.5,  // 50% chance of being marked 'important'
-      id: String(notes.length + 1),   // unique identifier generated based on total number of notes
-    }
-
-    setNotes(notes.concat(noteObject))  // add new note to list of notes -- creates new copy of
-    // array
-    setNewNote('')  // event handler resets value of controlled input
-  }
 
   const handleNoteChange = (event) => {
     console.log(event.target.value)
@@ -41,6 +26,34 @@ const App = () => {
   const notesToShow = showAll
       ? notes
       : notes.filter(note => note.important)
+
+  const toggleImportanceOf = (id) => {
+    const note = notes.find(n => n.id === id)  // find note to modify, assign to note var
+    const changedNote = { ...note, important: !note.important }  // create copy of old note,
+
+    noteService
+      .update(id, changedNote)
+      .then(returnedNote => {
+        setNotes(notes.map(note => note.id === id
+            ? returnedNote
+            : note))
+      })
+  }
+
+  const addNote = (event) => {
+    event.preventDefault()
+    const noteObject = {  // create new object for the incoming note from component's newNote state
+      content: newNote,  // value of 'newNote' will be passed here from user's input
+      important: Math.random() < 0.5,  // 50% chance of being marked 'important'
+    }
+
+    noteService
+      .create(noteObject)
+      .then(returnedNote => {
+        setNotes(notes.concat(returnedNote))
+        setNewNote('')
+      })
+  }
 
   return (
     <div>
@@ -52,7 +65,10 @@ const App = () => {
       </div>
       <ul>
         {notesToShow.map((note) => (
-          <Note key={note.id} note={note} />
+          <Note key={note.id}
+                note={note}
+                toggleImportance={() => toggleImportanceOf(note.id)}
+          />
         ))}
       </ul>
       <form onSubmit={addNote}>
