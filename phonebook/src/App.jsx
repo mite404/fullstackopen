@@ -4,7 +4,7 @@ import { Search } from './components/Search.jsx'
 import { PhonebookList } from './components/PhonebookList.jsx'
 import { Form } from "./components/Form.jsx";
 import axios from "axios";
-
+import personsService from './services/persons'
 
 const App = () => {
   const [persons, setPersons] = useState([])
@@ -14,18 +14,13 @@ const App = () => {
   useEffect(() => {
     const fetchPersons = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/persons')
+        const persons = await personsService.getAll()
 
-        console.log('Data fetched successfully: ', response.data)
-        // ensure response.data.persons is an array if not, set validPersons to an empty array
-        const validPersons = Array.isArray(response.data) ? response.data : []
-
-        setPersons(validPersons)
+        setPersons(persons)
       } catch (error) {
           console.error('Error fetching phonebook:', error)
       }
     }
-
     fetchPersons()
   }, []);
 
@@ -48,10 +43,10 @@ const App = () => {
     }
 
     try {
-      const response = await axios.post('http://localhost:3001/persons', personObject)
+      const newPerson = await personsService.create(personObject)
 
-      setPersons([...persons, response.data])
-      console.log(response.data.id)
+      setPersons([...persons, newPerson])
+      console.log(newPerson)
     } catch (error) {
         console.error('Error saving person:', error)
       }
@@ -73,12 +68,12 @@ const App = () => {
     }
 
     try {
-      const response = await axios.put(`http://localhost:3001/persons/${personId}`, updatedPersonObject)
+      const updatedPerson = await personsService.update(personId, updatedPersonObject)
 
       const updatedPersonsArray = persons.map(person => {
         if (person.id === personId) {
-          console.log(`${existingContact.name}'s phone number updated to: ${response.data.number}`)
-          return response.data
+          console.log(`${existingContact.name}'s phone number updated to: ${updatedPerson.number}`)
+          return updatedPerson
         } else {
           return person
         }
@@ -134,10 +129,11 @@ const App = () => {
 
       if (userConfirmsDel) {
         try {
+          await personsService.delete(personId)
           const updatedPersonsArray = persons.filter(person => person.id !== personId)
 
           setPersons(updatedPersonsArray)
-          console.log('Deleted:', personToDel)
+          console.log('Deleted:', personToDel.name)
 
         } catch (error) {
             console.error(`Error deleting ${personToDel}:`, error)
