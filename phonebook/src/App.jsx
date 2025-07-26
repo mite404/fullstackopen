@@ -12,17 +12,21 @@ const App = () => {
 
 
   useEffect(() => {
-    axios.get('http://localhost:3001/persons')
-         .then(response => {
-           console.log('Data fetched successfully: ', response.data)
+    const fetchPersons = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/persons')
 
-           // ensure response.data.persons is an array if not, set validPersons to an empty array
-           const validPersons = Array.isArray(response.data)
-               ? response.data : []
+        console.log('Data fetched successfully: ', response.data)
+        // ensure response.data.persons is an array if not, set validPersons to an empty array
+        const validPersons = Array.isArray(response.data) ? response.data : []
 
-           setPersons(validPersons)
-         })
-         .catch(error => console.error('Error fetching phonebook:', error))
+        setPersons(validPersons)
+      } catch (error) {
+          console.error('Error fetching phonebook:', error)
+      }
+    }
+
+    fetchPersons()
   }, []);
 
 
@@ -32,7 +36,7 @@ const App = () => {
    * @param {string} newName - The name of the person.
    * @param {string} newPhoneNum - The phone number of the person.
    */
-  const addContact = (newName, newPhoneNum) => {
+  const addContact = async (newName, newPhoneNum) => {
     if (persons.find(person => person.name === newName || person.number === newPhoneNum)) {
       alert(`name: ${newName} / phone number: ${newPhoneNum} already in the phonebook`);
       return;
@@ -43,12 +47,14 @@ const App = () => {
       number: newPhoneNum,
     }
 
-    axios.post('http://localhost:3001/persons', personObject)
-          .then(response => {
-            setPersons([...persons, response.data])
-            console.log(response.data.id)
-          })
-          .catch(error => console.error('Error saving person:', error))
+    try {
+      const response = await axios.post('http://localhost:3001/persons', personObject)
+
+      setPersons([...persons, response.data])
+      console.log(response.data.id)
+    } catch (error) {
+        console.error('Error saving person:', error)
+      }
   }
 
 
@@ -58,7 +64,7 @@ const App = () => {
    * @param {string} newPhoneNum - The new phone number for the person.
    * @param {number} personId - The ID of the person whose contact information needs to be updated.
    */
-  const updateContact = (newPhoneNum, personId) => {
+  const updateContact = async (newPhoneNum, personId) => {
     const existingContact = persons.find(person => person.id === personId)
     const updatedPersonObject = {
       id: personId,
@@ -66,19 +72,21 @@ const App = () => {
       number: newPhoneNum         // NEW phone number
     }
 
-    axios.put(`http://localhost:3001/persons/${personId}`, updatedPersonObject)
-           .then(response => {
-             const updatedPersonsArray = persons.map(person => {
-               if (person.id === personId) {
-                 console.log(`${existingContact.name}'s phone number updated to: ${response.data.number}`)
-                 return response.data
-               } else {
-                 return person
-               }
-             })
-             setPersons(updatedPersonsArray)
-           })
-           .catch(error => console.error('Error saving new phone number:', error))
+    try {
+      const response = await axios.put(`http://localhost:3001/persons/${personId}`, updatedPersonObject)
+
+      const updatedPersonsArray = persons.map(person => {
+        if (person.id === personId) {
+          console.log(`${existingContact.name}'s phone number updated to: ${response.data.number}`)
+          return response.data
+        } else {
+          return person
+        }
+      })
+      setPersons(updatedPersonsArray)
+    } catch (error) {
+      console.error('Error saving new phone number:', error)
+    }
   }
 
   /**
@@ -118,20 +126,22 @@ const App = () => {
    *
    * @param {number} personId - The ID of the person to be deleted.
    */
-  const onDelete = (personId) => {
+  const onDelete = async (personId) => {
     const personToDel = persons.find(person => person.id === personId)
 
     if (personToDel) {
       const userConfirmsDel = window.confirm(`Do you want to delete this entry?`)
 
       if (userConfirmsDel) {
-        axios.delete(`http://localhost:3001/persons/${personId}`)
-              .then(() => {
-                const updatedPersonsArray = persons.filter(person => person.id !== personId)
-                setPersons(updatedPersonsArray)
-                console.log('Deleted:', personToDel)
-              })
-             .catch(error => console.error(`Error deleting ${personToDel}:`, error))
+        try {
+          const updatedPersonsArray = persons.filter(person => person.id !== personId)
+
+          setPersons(updatedPersonsArray)
+          console.log('Deleted:', personToDel)
+
+        } catch (error) {
+            console.error(`Error deleting ${personToDel}:`, error)
+        }
       }
     }
   }
