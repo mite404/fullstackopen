@@ -1,4 +1,4 @@
-export function PhonebookList({ persons, searchTerm }) {
+export function PhonebookList({ persons, searchTerm, onDelete }) {
   // @description Filters persons based on the search term.
   // @returns {Array} - An array of filtered persons.
 
@@ -16,7 +16,10 @@ export function PhonebookList({ persons, searchTerm }) {
   return (
       <ul>
         {filteredPersons.map(person =>
-            <li key={person.id}>{person.name}: {removeHyphens(person.phonenumber)}
+            <li key={person.id}>{person.name}: {removeHyphens(person.number)}
+              <button type='button'
+                      onClick={() => onDelete(person.id)}>del
+              </button>
             </li>
         )}
       </ul>
