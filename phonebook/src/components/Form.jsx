@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export function Form({ addContact }) {
+export function Form({ saveContact }) {
   const [newName, setNewName] = useState('')
   const [newPhoneNum, setNewPhoneNum] = useState('')
 
@@ -29,9 +29,10 @@ export function Form({ addContact }) {
   const handleSubmit = (event) => {
     event.preventDefault();
     if (!newName || !newPhoneNum) return;
-    addContact(newName, newPhoneNum)
+    saveContact(newName, newPhoneNum)
     setNewName('')
     setNewPhoneNum('')
+    console.log(`${newName} has been submitted via form`)
   }
 
   return (
