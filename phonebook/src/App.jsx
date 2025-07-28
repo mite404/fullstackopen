@@ -1,29 +1,41 @@
 import {useEffect, useState} from 'react'
 import './App.css'
-import { Search } from './components/Search.jsx'
-import { PhonebookList } from './components/PhonebookList.jsx'
-import { Form } from "./components/Form.jsx";
+import { Search } from './components/Search'
+import { PhonebookList } from './components/PhonebookList'
+import { Form } from "./components/Form";
+import { Notification } from "./components/Notification";
 import axios from "axios";
 import personsService from './services/persons'
 
 const App = () => {
-  const [persons, setPersons] = useState([])
+  const [persons, setPersons] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [message, setMessage] = useState('')
 
 
   useEffect(() => {
-    const fetchPersons = async () => {
-      try {
-        const persons = await personsService.getAll()
+    console.log('effect run, persons array is now', persons)
 
-        setPersons(persons)
-      } catch (error) {
+    if (!persons) {
+      console.log('fetching persons...')
+
+      const fetchPersons = async () => {
+        try {
+          const fetchedPersons = await personsService.getAll()
+
+          setPersons(fetchedPersons)
+        } catch (error) {
           console.error('Error fetching phonebook:', error)
+        }
       }
+      fetchPersons()
     }
-    fetchPersons()
-  }, []);
+  }, [persons]);
 
+  // do not render anything if persons array is still null
+  if (!persons) {
+    return <div>Loading contacts...</div>
+  }
 
   /**
    * Adds a new contact to the phonebook.
@@ -33,7 +45,8 @@ const App = () => {
    */
   const addContact = async (newName, newPhoneNum) => {
     if (persons.find(person => person.name === newName || person.number === newPhoneNum)) {
-      alert(`name: ${newName} / phone number: ${newPhoneNum} already in the phonebook`);
+      setMessage(`name: ${newName} / phone number: ${newPhoneNum} already in the phonebook`)
+      setTimeout(() => setMessage(null), 5000)
       return;
     }
 
@@ -48,7 +61,8 @@ const App = () => {
       setPersons([...persons, newPerson])
       console.log(newPerson)
     } catch (error) {
-        console.error('Error saving person:', error)
+        setMessage(error)
+        setTimeout(() => setMessage(null), 5000)
       }
   }
 
@@ -72,7 +86,10 @@ const App = () => {
 
       const updatedPersonsArray = persons.map(person => {
         if (person.id === personId) {
+          setMessage(`${existingContact.name}'s phone number updated to: ${updatedPerson.number}`)
           console.log(`${existingContact.name}'s phone number updated to: ${updatedPerson.number}`)
+          setTimeout(() => setMessage(null), 5000)
+
           return updatedPerson
         } else {
           return person
@@ -80,7 +97,20 @@ const App = () => {
       })
       setPersons(updatedPersonsArray)
     } catch (error) {
-      console.error('Error saving new phone number:', error)
+      const personNotFound = error.response && error.response.status === 404
+
+      if (personNotFound) {
+        const updatedPersonsArray = persons.filter(person => person.id !== personId)
+
+        setMessage(`Contact ${existingContact.name} doesn't exist`)
+        setTimeout(() => setMessage(null), 5000)
+
+        setPersons(updatedPersonsArray)
+
+      } else {
+        setMessage(`'Error saving new phone number: ${error}`)
+        setTimeout(() => setMessage(null), 5000)
+      }
     }
   }
 
@@ -101,7 +131,8 @@ const App = () => {
       addContact(newName, newPhoneNum)
     }
     else if (existingPerson) {
-      const userConfirmsUpdate = window.confirm(`${existingPerson.name} already exists! Would you like to update their contact info?`)
+      const userConfirmsUpdate = window.confirm(`${existingPerson.name} already exists! 
+        Would you like to update their contact info?`)
 
       if (userConfirmsUpdate) return updateContact(newPhoneNum, existingPerson.id)
     }
@@ -133,7 +164,7 @@ const App = () => {
           const updatedPersonsArray = persons.filter(person => person.id !== personId)
 
           setPersons(updatedPersonsArray)
-          console.log('Deleted:', personToDel.name)
+          setMessage(`Deleted: ${personToDel.name}`)
 
         } catch (error) {
             console.error(`Error deleting ${personToDel}:`, error)
@@ -144,6 +175,7 @@ const App = () => {
 
   return (
       <div>
+        <Notification message={message} />
         <h2>Phonebook</h2>
         <Form saveContact={saveContact} />
         <hr/>
