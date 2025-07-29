@@ -4,7 +4,6 @@ import { Search } from './components/Search'
 import { PhonebookList } from './components/PhonebookList'
 import { Form } from "./components/Form";
 import { Notification } from "./components/Notification";
-import axios from "axios";
 import personsService from './services/persons'
 
 const App = () => {

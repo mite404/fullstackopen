@@ -1,0 +1,11 @@
+###
+
+GET https://studies.cs.helsinki.fi/restcountries/
+
+###
+
+GET https://studies.cs.helsinki.fi/restcountries/api/all
+
+###
+
+GET https://studies.cs.helsinki.fi/restcountries/api/name/finland
