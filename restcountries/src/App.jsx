@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import './App.css'
 import axios from "axios";
 import {Search} from "./components/Search.jsx";
+import {CountryHero} from "./components/CountryHero.jsx";
 
 function App() {
   const [countries, setCountries] = useState([])
@@ -52,7 +53,9 @@ function App() {
           </ul>
       )}
       {updatedCountries.length === 1 && (
-          <p>Individual country's details here</p>
+          <>
+            <CountryHero country={updatedCountries[0]}/>
+          </>
       )}
     </>
   )
