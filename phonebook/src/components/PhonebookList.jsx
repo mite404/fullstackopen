@@ -16,7 +16,9 @@ export function PhonebookList({ persons, searchTerm, onDelete }) {
   return (
       <ul>
         {filteredPersons.map(person =>
-            <li key={person.id}>{person.name}: {removeHyphens(person.number)}
+            <li className='contact'
+                key={person.id}>
+                {person.name}: {removeHyphens(person.number)}
               <button type='button'
                       onClick={() => onDelete(person.id)}>del
               </button>
